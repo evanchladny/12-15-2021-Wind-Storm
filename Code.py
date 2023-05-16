@@ -37,7 +37,6 @@ for i in range(2,12):
     ax = plt.axes(projection=ccrs.PlateCarree())
     ax.coastlines(resolution='50m')
     ax.add_feature(cfeature.STATES)
-    central_lon, central_lat = 98, 39.5
     extent = [-105, -90, 44.5, 34.5]
     ax.set_extent(extent)
     
@@ -56,13 +55,13 @@ for i in range(2,12):
     cs = ax.contourf(w_ds['longitude'], 
                       w_ds['latitude'], 
                       wind,
-                      transform = ccrs.PlateCarree(),extend='both', cmap = 'inferno_r', levels = [25, 30, 35, 40, 45, 50, 55], alpha = 0.6)
+                      transform = ccrs.PlateCarree(), extend='both', cmap = 'inferno_r', levels = [25, 30, 35, 40, 45, 50, 55], alpha = 0.6)
 
     ax.barbs(w_ds['longitude'][::6], w_ds['latitude'][::6], w_ds['u10'][i, ::6, ::6], w_ds['v10'][i, ::6, ::6], length = 6)
 
     cbar = plt.colorbar(cs,orientation='horizontal', label = '10-m Wind speed [mph]', shrink = .5, pad = 0.05)
     
-    ax.contour(p_ds['longitude'], p_ds['latitude'], p_ds['msl'][i,:,:], 20)
+    ax.contour(p_ds['longitude'], p_ds['latitude'], p_ds['msl'][i,:,:], 20, transform = ccrs.PlateCarree())
     
     #Saves each figure to the output folder along with adding them to the array
     
@@ -86,9 +85,10 @@ imageio.mimsave('./Output/GIFs/Full_Event_Winds.gif',
 fname = './Data/Wind_Gusts'
 g_ds=xr.open_dataset(fname)
 
-#Creates a new array for future GIF
+#Creates a new arrays for future GIF and 100+ mph map
 
 gusts_frames = []
+areas_100mph = []
 
 for i in range(2,12):
     
@@ -112,6 +112,13 @@ for i in range(2,12):
     plt.title('Wind Gusts and Pressure: ' + title_str)
 
     wind = 2.237*np.sqrt((g_ds['i10fg'][i,:,:]*g_ds['i10fg'][i,:,:]) + (g_ds['i10fg'][i,:,:]*g_ds['i10fg'][i,:,:]))
+    
+    # Saves points for 100+ mph map
+    
+    indices = np.where(wind > 100)
+    
+    for lat, lon in zip(g_ds['latitude'][indices[0]], g_ds['longitude'][indices[1]]):
+        areas_100mph.append((lat, lon))
 
     cs = ax.contourf(g_ds['longitude'], 
                       g_ds['latitude'], 
@@ -152,3 +159,22 @@ for i in range(2,12):
 imageio.mimsave('./Output/GIFs/Full_Event_Gusts.gif',
             gusts_frames,
             fps = 1)
+
+#Creates 100+ mph wind gust areas
+
+# Create a new map to plot areas with 100+ mph winds
+plt.figure(figsize=(10, 8))
+ax = plt.axes(projection=ccrs.Mercator())
+ax.coastlines(resolution='50m')
+ax.add_feature(cfeature.STATES)
+extent = [-104.5, -90, 43, 34.5]
+ax.set_extent(extent)
+
+# Plot the areas with 100+ mph winds
+for lat, lon in areas_100mph:
+    plt.plot(lon, lat, marker='o', markersize=5, color='red', transform=ccrs.PlateCarree())
+
+# Save the figure
+plt.title('Areas with 100+ mph Wind Gusts')
+plt.savefig('Output/Images/100mph_Points.png', bbox_inches='tight', dpi=400)
+plt.show()

@@ -6,4 +6,4 @@ A very pronounced and deep low moved off the Rockies throughout the day on the 1
 
 In my reanalysis, I used ERA5 data for the day to understand the broad system and what areas recieved the highest winds. To further showcase where the highest winds were, I highlighted the 100 mph contour in the gust maps. Finally, I plotted all the areas that experienced 100+ mph wind gusts.
 
-In the 'Output' file, there are 'GIFs' and 'Images' folders. The 'Images' folder simply contains the frames that are found the GIFs in the 'GIFs' folder. 
+In the 'Output' file, there are 'GIFs' and 'Images' folders. The 'Images' folder simply contains the frames that are found the GIFs in the 'GIFs' folder, along with the 100+ mph wind gust map.
